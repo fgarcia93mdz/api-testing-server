@@ -66,6 +66,28 @@ function createUser(req, res) {
   }
 }
 
+function editUser(req, res) {
+  const userId = parseInt(req.params.id);
+  const updatedUser = req.body;
+  try {
+    const usersData = fs.readFileSync(usersCursoJs, 'utf-8');
+    const users = JSON.parse(usersData);
+    const userIndex = users.findIndex(user => user.id === userId);
+    if (userIndex !== -1) {
+      users[userIndex] = Object.assign(users[userIndex], updatedUser);
+      fs.writeFileSync(usersCursoJs, JSON.stringify(users, null, 2));
+      res.json(users[userIndex]);
+    } else {
+      res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+  } catch (error) {
+    console.error('Error al leer/escribir el archivo JSON:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+}
+
+//Roles en API de informes del curso de js
+
 function getAllRoles(req, res) {
   try {
     const rolesData = fs.readFileSync(rolesCursoJs, 'utf-8');
@@ -82,5 +104,6 @@ module.exports = {
   getAllUsers,
   getUserById,
   createUser,
+  editUser,
   getAllRoles,
 };
