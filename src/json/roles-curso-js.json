@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "nombre": "Gerencia"
+  },
+  {
+    "id": 2,
+    "nombre": "Jefatura"
+  },
+  {
+    "id": 3,
+    "nombre": "Supervisor"
+  },
+  {
+    "id": 4,
+    "nombre": "Operador"
+  }
+]

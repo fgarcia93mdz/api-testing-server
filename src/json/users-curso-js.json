@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "rol": 4,
+    "nombre": "John",
+    "apellido": "Doe",
+    "usuario": "john.doe",
+    "email": "john.doe@example.com",
+    "password": "password123"
+  },
+  {
+    "id": 2,
+    "rol": 4,
+    "nombre": "Jane",
+    "apellido": "Smith",
+    "usuario": "jane.smith",
+    "email": "jane.smith@example.com",
+    "password": "abc123"
+  },
+  {
+    "id": 3,
+    "rol": 3,
+    "nombre": "Michael",
+    "apellido": "Johnson",
+    "usuario": "michael.johnson",
+    "email": "michael.johnson@example.com",
+    "password": "admin456"
+  },
+  {
+    "id": 4,
+    "rol": 4,
+    "nombre": "Emily",
+    "apellido": "Davis",
+    "usuario": "emily.davis",
+    "email": "emily.davis@example.com",
+    "password": "welcome789"
+  },
+  {
+    "id": 5,
+    "rol": 4,
+    "nombre": "David",
+    "apellido": "Martinez",
+    "usuario": "david.martinez",
+    "email": "david.martinez@example.com",
+    "password": "secure123"
+  },
+  {
+    "id": 6,
+    "rol": 4,
+    "nombre": "Sophia",
+    "apellido": "Wilson",
+    "usuario": "sophia.wilson",
+    "email": "sophia.wilson@example.com",
+    "password": "pass1234"
+  },
+  {
+    "id": 7,
+    "rol": 4,
+    "nombre": "James",
+    "apellido": "Taylor",
+    "usuario": "james.taylor",
+    "email": "james.taylor@example.com",
+    "password": "password567"
+  },
+  {
+    "id": 8,
+    "rol": 4,
+    "nombre": "Olivia",
+    "apellido": "Anderson",
+    "usuario": "olivia.anderson",
+    "email": "olivia.anderson@example.com",
+    "password": "test123"
+  },
+  {
+    "id": 9,
+    "rol": 3,
+    "nombre": "William",
+    "apellido": "Clark",
+    "usuario": "william.clark",
+    "email": "william.clark@example.com",
+    "password": "pass456"
+  },
+  {
+    "id": 10,
+    "rol": 4,
+    "nombre": "Emma",
+    "apellido": "Thomas",
+    "usuario": "emma.thomas",
+    "email": "emma.thomas@example.com",
+    "password": "example789"
+  }
+]

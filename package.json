@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Un servidor Node.js para una API testing",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon app.js"
   },
   "dependencies": {
     "express": "^4.17.1"
