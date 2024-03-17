@@ -1,34 +1,30 @@
 const fs = require('fs');
 const path = require('path');
 
-const usersCursoJs = path.join(__dirname, '../json/users-curso-js.json');
-const rolesCursoJs = path.join(__dirname, '../json/roles-curso-js.json');
+const { db } = require('../firebase');
 
 function getAllUsers(req, res) {
-  let users = [];
-  let roles = [];
-
   db.collection('users').get()
     .then(snapshot => {
+      const users = [];
+      const promises = [];
       snapshot.forEach(doc => {
-        users.push(doc.data());
-      });
-
-      return db.collection('roles').get();
-    })
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        roles.push(doc.data());
-      });
-
-      // Agregar información de roles a cada usuario
-      users.forEach(user => {
-        const userRole = roles.find(rol => rol.id === user.rol);
-        if (userRole) {
-          user.rol = userRole;
+        const user = doc.data();
+        user.id = doc.id;
+        if (typeof user.rol === 'number') {
+          const promise = db.collection('roles').doc(user.rol.toString()).get()
+            .then(roleDoc => {
+              if (roleDoc.exists) {
+                user.rol = roleDoc.data();
+              }
+            });
+          promises.push(promise);
         }
+        users.push(user);
       });
-
+      return Promise.all(promises).then(() => users);
+    })
+    .then(users => {
       res.json(users);
     })
     .catch(error => {
@@ -38,78 +34,109 @@ function getAllUsers(req, res) {
 }
 
 function getUserById(req, res) {
-  const userId = parseInt(req.params.id);
-  try {
-    const usersData = fs.readFileSync(usersCursoJs, 'utf-8');
-    const users = JSON.parse(usersData);
-    const user = users.find(user => user.id === userId);
-    if (user) {
-      const rolesData = fs.readFileSync(rolesCursoJs, 'utf-8');
-      const roles = JSON.parse(rolesData);
-      const userRole = roles.find(role => role.id === user.role_id);
-      users.forEach(user => {
-        const userRole = roles.find(rol => rol.id === user.rol);
-        if (userRole) {
-          user.rol = userRole;
-        }
-      });
+  const userId = req.params.id;
+  db.collection('users').doc(userId).get()
+    .then(doc => {
+      if (doc.exists) {
+        const user = doc.data();
+        user.id = doc.id;
+        return db.collection('roles').doc(user.rol.toString()).get()
+          .then(roleDoc => {
+            if (roleDoc.exists) {
+              user.rol = roleDoc.data();
+            }
+            return user;
+          });
+      } else {
+        res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+    })
+    .then(user => {
       res.json(user);
-    } else {
-      res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-  } catch (error) {
-    console.error('Error al leer el archivo JSON:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+    })
+    .catch(error => {
+      console.error('Error al leer de Firestore:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    });
 }
 
 function createUser(req, res) {
   const newUser = req.body;
-  try {
-    const usersData = fs.readFileSync(usersCursoJs, 'utf-8');
-    const users = JSON.parse(usersData);
-    users.push(newUser);
-    fs.writeFileSync(usersCursoJs, JSON.stringify(users, null, 2));
-    res.status(201).json(newUser);
-  } catch (error) {
-    console.error('Error al leer/escribir el archivo JSON:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+  if (newUser === null || newUser === undefined) {
+    res.status(400).json({ error: 'Petición inválida' });
+    return;
   }
+
+  db.collection('users')
+    .where('usuario', '==', newUser.usuario)
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        res.status(400).json({ error: 'El nombre de usuario ya existe' });
+        return;
+      }
+
+      db.collection('users')
+        .orderBy('id', 'desc')
+        .limit(1)
+        .get()
+        .then(snapshot => {
+          let lastId = 0;
+          snapshot.forEach(doc => {
+            lastId = doc.data().id;
+          });
+
+          newUser.id = lastId + 1;
+
+          db.collection('users').add(newUser)
+            .then(docRef => {
+              res.status(201).json({message: 'Usuario creado', id: docRef.id});
+            })
+            .catch(error => {
+              console.error('Error al escribir en Firestore:', error);
+              res.status(500).json({ error: 'Error interno del servidor' });
+            });
+        })
+        .catch(error => {
+          console.error('Error al obtener el último usuario:', error);
+          res.status(500).json({ error: 'Error interno del servidor' });
+        });
+    })
+    .catch(error => {
+      console.error('Error al verificar el nombre de usuario:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    });
 }
 
 function editUser(req, res) {
-  const userId = parseInt(req.params.id);
+  const userId = req.params.id;
   const updatedUser = req.body;
-  try {
-    const usersData = fs.readFileSync(usersCursoJs, 'utf-8');
-    const users = JSON.parse(usersData);
-    const userIndex = users.findIndex(user => user.id === userId);
-    if (userIndex !== -1) {
-      users[userIndex] = Object.assign(users[userIndex], updatedUser);
-      fs.writeFileSync(usersCursoJs, JSON.stringify(users, null, 2));
-      res.json(users[userIndex]);
-    } else {
-      res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-  } catch (error) {
-    console.error('Error al leer/escribir el archivo JSON:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+  db.collection('users').doc(userId).update(updatedUser)
+    .then(() => {
+      res.json({message: 'Usuario actualizado'});
+    })
+    .catch(error => {
+      console.error('Error al escribir en Firestore:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    });
 }
-
-//Roles en API de informes del curso de js
 
 function getAllRoles(req, res) {
-  try {
-    const rolesData = fs.readFileSync(rolesCursoJs, 'utf-8');
-    const roles = JSON.parse(rolesData);
-    res.json(roles);
-  } catch (error) {
-    console.error('Error al leer el archivo JSON:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+  db.collection('roles').get()
+    .then(snapshot => {
+      const roles = [];
+      snapshot.forEach(doc => {
+        const rol = doc.data();
+        rol.id = doc.id;
+        roles.push(rol);
+      });
+      res.json(roles);
+    })
+    .catch(error => {
+      console.error('Error al leer de Firestore:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    });
 }
-
 
 module.exports = {
   getAllUsers,
