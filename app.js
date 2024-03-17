@@ -4,9 +4,12 @@ const usersRoutes = require('./src/routes/users');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-//test
-
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.send('¡Bienvenido a mi aplicación!');
+});
+
 app.use('/api/users', usersRoutes);
 
 app.listen(PORT, () => {
