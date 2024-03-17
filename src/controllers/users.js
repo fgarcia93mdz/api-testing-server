@@ -5,25 +5,36 @@ const usersCursoJs = path.join(__dirname, '../json/users-curso-js.json');
 const rolesCursoJs = path.join(__dirname, '../json/roles-curso-js.json');
 
 function getAllUsers(req, res) {
-  try {
-    const usersData = fs.readFileSync(usersCursoJs, 'utf-8');
-    const users = JSON.parse(usersData);
-    const rolesData = fs.readFileSync(rolesCursoJs, 'utf-8');
-    const roles = JSON.parse(rolesData);
+  let users = [];
+  let roles = [];
 
-    // Agregar información de roles a cada usuario
-    users.forEach(user => {
-      const userRole = roles.find(rol => rol.id === user.rol);
-      if (userRole) {
-        user.rol = userRole;
-      }
+  db.collection('users').get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        users.push(doc.data());
+      });
+
+      return db.collection('roles').get();
+    })
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        roles.push(doc.data());
+      });
+
+      // Agregar información de roles a cada usuario
+      users.forEach(user => {
+        const userRole = roles.find(rol => rol.id === user.rol);
+        if (userRole) {
+          user.rol = userRole;
+        }
+      });
+
+      res.json(users);
+    })
+    .catch(error => {
+      console.error('Error al leer de Firestore:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
     });
-
-    res.json(users);
-  } catch (error) {
-    console.error('Error al leer el archivo JSON:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
 }
 
 function getUserById(req, res) {
