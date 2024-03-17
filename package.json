@@ -2,6 +2,9 @@
   "name": "api-testing-server",
   "version": "1.0.0",
   "description": "Un servidor Node.js para una API testing",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "start": "nodemon app.js"
   },
