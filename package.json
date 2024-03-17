@@ -1,0 +1,14 @@
+{
+  "name": "api-testing-server",
+  "version": "1.0.0",
+  "description": "Un servidor Node.js para una API testing",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
