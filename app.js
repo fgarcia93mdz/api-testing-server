@@ -1,53 +1,26 @@
 const express = require('express');
 const usersRoutes = require('./src/routes/users');
+const passport = require('passport');
+require('./src/passport-config');
+const auth = require('./src/routes/auth');
+
+const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+const cors = require('cors');
 
-// const roles = [
-//   {
-//     "id": 1,
-//     "nombre": "Gerencia"
-//   },
-//   {
-//     "id": 2,
-//     "nombre": "Jefatura"
-//   },
-//   {
-//     "id": 3,
-//     "nombre": "Supervisor"
-//   },
-//   {
-//     "id": 4,
-//     "nombre": "Operador"
-//   }
-// ]
+app.use(cors());
 
-// Promise.all(roles.map(rol => db.collection('roles').doc(rol.id.toString()).set(rol)))
-//   .then(() => {
-//     console.log('Todos los usuarios se han insertado correctamente.');
+app.use(session({
+  secret: 'asd123fgh456jkl678',
+  resave: false,
+  saveUninitialized: true,
+}));
 
-//     // Ahora puedes comenzar a escuchar en tu puerto
-//     app.listen(PORT, () => {
-//       console.log(`Servidor en funcionamiento en http://localhost:${PORT}`);
-//     });
-//   })
-//   .catch(error => {
-//     console.error('Error al insertar usuarios:', error);
-//   });
-
-
-// app.get('/api/check-connection', async (req, res) => {
-//   try {
-//     const snapshot = await db.collection('roles').get();
-//     const roles = snapshot.docs.map(doc => doc.data());
-//     res.json(roles);
-//   } catch (error) {
-//     console.error('Error al obtener documentos:', error);
-//     res.status(500).json({ error: 'Error interno del servidor' });
-//   }
-// });
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.json());
 
@@ -56,6 +29,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', usersRoutes);
+app.use('/api/auth', auth);
 
 app.listen(PORT, () => {
   console.log(`Servidor en funcionamiento en http://localhost:${PORT}`);

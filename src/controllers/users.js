@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 const { db } = require('../firebase');
 
@@ -88,14 +89,24 @@ function createUser(req, res) {
 
           newUser.id = lastId + 1;
 
-          db.collection('users').add(newUser)
-            .then(docRef => {
-              res.status(201).json({message: 'Usuario creado', id: docRef.id});
-            })
-            .catch(error => {
-              console.error('Error al escribir en Firestore:', error);
+          bcrypt.hash(newUser.password, 10, function (err, hash) {
+            if (err) {
+              console.error('Error al encriptar la contraseña:', err);
               res.status(500).json({ error: 'Error interno del servidor' });
-            });
+              return;
+            }
+
+            newUser.password = hash;
+
+            db.collection('users').add(newUser)
+              .then(docRef => {
+                res.status(201).json({ message: 'Usuario creado', id: docRef.id });
+              })
+              .catch(error => {
+                console.error('Error al escribir en Firestore:', error);
+                res.status(500).json({ error: 'Error interno del servidor' });
+              });
+          });
         })
         .catch(error => {
           console.error('Error al obtener el último usuario:', error);
