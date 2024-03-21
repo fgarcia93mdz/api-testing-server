@@ -1,5 +1,6 @@
 const express = require('express');
 const usersRoutes = require('./src/routes/users');
+const sectorsRoutes = require('./src/routes/sectors');
 const passport = require('passport');
 require('./src/passport-config');
 const auth = require('./src/routes/auth');
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', usersRoutes);
+app.use('/api/sectors', sectorsRoutes);
 app.use('/api/auth', auth);
 
 app.listen(PORT, () => {
