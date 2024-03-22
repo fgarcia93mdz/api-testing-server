@@ -68,7 +68,6 @@ function createUser(req, res) {
     return;
   }
 
-  // Convertir el rol a número
   newUser.rol = parseInt(newUser.rol);
 
   db.collection('users')
